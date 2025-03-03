@@ -32,6 +32,7 @@ class AdminDashboardController(
         model.addAttribute("questionCount", questionCount)
         model.addAttribute("quizCount", quizCount)
         model.addAttribute("attemptCount", attemptCount)
+        model.addAttribute("activePage", "dashboard")
 
         return "admin/dashboard"
     }
@@ -41,12 +42,14 @@ class AdminDashboardController(
     fun categories(model: Model): String {
         val categories = categoryService.getAllCategories()
         model.addAttribute("categories", categories)
+        model.addAttribute("activePage", "categories")
         return "admin/categories"
     }
 
     @GetMapping("/categories/new")
     fun newCategory(model: Model): String {
         model.addAttribute("category", Category())
+        model.addAttribute("activePage", "categories")
         return "admin/category-form"
     }
 
@@ -61,6 +64,7 @@ class AdminDashboardController(
     fun editCategory(@PathVariable id: Long, model: Model): String {
         val category = categoryService.getCategoryById(id)
         model.addAttribute("category", category)
+        model.addAttribute("activePage", "categories")
         return "admin/category-form"
     }
 
@@ -76,6 +80,7 @@ class AdminDashboardController(
     fun viewCategory(@PathVariable id: Long, model: Model): String {
         val category = categoryService.getCategoryById(id)
         model.addAttribute("category", category)
+        model.addAttribute("activePage", "categories")
         return "admin/category-view"
     }
 
@@ -109,6 +114,7 @@ class AdminDashboardController(
         model.addAttribute("categoryId", categoryId)
         model.addAttribute("search", search)
         model.addAttribute("categories", categoryService.getAllCategories())
+        model.addAttribute("activePage", "questions")
 
         return "admin/questions"
     }
@@ -118,6 +124,7 @@ class AdminDashboardController(
         val question = Question()
         model.addAttribute("question", question)
         model.addAttribute("categories", categoryService.getAllCategories())
+        model.addAttribute("activePage", "questions")
         return "admin/question-form"
     }
 
@@ -220,6 +227,7 @@ class AdminDashboardController(
         model.addAttribute("categoryId", categoryId)
         model.addAttribute("search", search)
         model.addAttribute("categories", categoryService.getAllCategories())
+        model.addAttribute("activePage", "quizzes")
 
         return "admin/quizzes"
     }
@@ -231,6 +239,7 @@ class AdminDashboardController(
         model.addAttribute("quiz", quiz)
         model.addAttribute("categories", categoryService.getAllCategories())
         model.addAttribute("availableQuestions", questionService.getAllQuestions())
+        model.addAttribute("activePage", "quizzes")
         return "admin/quiz-form"
     }
 
@@ -349,6 +358,7 @@ class AdminDashboardController(
         model.addAttribute("date", date)
         model.addAttribute("username", username)
         model.addAttribute("quizzes", quizService.getAllQuizzes())
+        model.addAttribute("activePage", "attempts")
 
         return "admin/attempts"
     }
@@ -366,6 +376,7 @@ class AdminDashboardController(
         model.addAttribute("responses", responses)
         model.addAttribute("totalQuestions", totalQuestions)
         model.addAttribute("correctCount", correctCount)
+        model.addAttribute("activePage", "attempts")
         
         return "admin/attempt-view"
     }

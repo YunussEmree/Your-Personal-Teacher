@@ -60,7 +60,7 @@
 </head>
 <body>
     <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
-        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="/admin/dashboard">Quiz Admin</a>
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="/admin">Quiz Admin</a>
         <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" 
                 data-bs-toggle="collapse" data-bs-target="#sidebarMenu" 
                 aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
@@ -81,35 +81,35 @@
                 <div class="sidebar-sticky pt-3">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link" th:classappend="${#httpServletRequest.getRequestURI() == '/admin/dashboard' ? 'active' : ''}" 
-                               href="/admin/dashboard">
+                            <a class="nav-link" th:classappend="${activePage == 'dashboard'} ? 'active' : ''" 
+                               href="/admin">
                                 <i class="fas fa-tachometer-alt"></i>
                                 Dashboard
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" th:classappend="${#httpServletRequest.getRequestURI() == '/admin/categories' ? 'active' : ''}" 
+                            <a class="nav-link" th:classappend="${activePage == 'categories'} ? 'active' : ''" 
                                href="/admin/categories">
                                 <i class="fas fa-list"></i>
                                 Categories
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" th:classappend="${#httpServletRequest.getRequestURI() == '/admin/questions' ? 'active' : ''}" 
+                            <a class="nav-link" th:classappend="${activePage == 'questions'} ? 'active' : ''" 
                                href="/admin/questions">
                                 <i class="fas fa-question-circle"></i>
                                 Questions
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" th:classappend="${#httpServletRequest.getRequestURI() == '/admin/quizzes' ? 'active' : ''}" 
+                            <a class="nav-link" th:classappend="${activePage == 'quizzes'} ? 'active' : ''" 
                                href="/admin/quizzes">
                                 <i class="fas fa-file-alt"></i>
                                 Quizzes
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" th:classappend="${#httpServletRequest.getRequestURI() == '/admin/attempts' ? 'active' : ''}" 
+                            <a class="nav-link" th:classappend="${activePage == 'attempts'} ? 'active' : ''" 
                                href="/admin/attempts">
                                 <i class="fas fa-history"></i>
                                 Quiz Attempts
