@@ -3,6 +3,8 @@ package com.yunussemree.ypt.service
 import com.yunussemree.ypt.model.Category
 import com.yunussemree.ypt.repository.CategoryRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.util.NoSuchElementException
 import jakarta.annotation.PostConstruct
 
 @Service
@@ -10,7 +12,9 @@ class CategoryService(private val categoryRepository: CategoryRepository) {
     
     fun getAllCategories(): List<Category> = categoryRepository.findAll()
     
-    fun getCategoryById(id: Long): Category? = categoryRepository.findById(id).orElse(null)
+    fun getCategoryById(id: Long): Category {
+        return categoryRepository.findById(id).orElseThrow { NoSuchElementException("Category not found with id: $id") }
+    }
     
     fun createCategory(category: Category): Category = categoryRepository.save(category)
     
@@ -21,9 +25,14 @@ class CategoryService(private val categoryRepository: CategoryRepository) {
         return categoryRepository.save(category)
     }
     
+    @Transactional
     fun deleteCategory(id: Long) {
-        val category = getCategoryById(id) ?: throw RuntimeException("Category not found")
+        val category = getCategoryById(id)
         categoryRepository.delete(category)
+    }
+    
+    fun countCategories(): Long {
+        return categoryRepository.count()
     }
     
     @PostConstruct

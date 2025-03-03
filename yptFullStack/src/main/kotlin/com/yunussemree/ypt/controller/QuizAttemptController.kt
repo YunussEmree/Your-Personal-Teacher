@@ -6,6 +6,7 @@ import com.yunussemree.ypt.service.QuizAttemptService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.util.NoSuchElementException
 
 @RestController
 @RequestMapping("/api/quiz-attempts")
@@ -19,9 +20,12 @@ class QuizAttemptController(private val quizAttemptService: QuizAttemptService) 
 
     @GetMapping("/{id}")
     fun getQuizAttemptById(@PathVariable id: Long): ResponseEntity<QuizAttempt> {
-        val attempt = quizAttemptService.getQuizAttemptById(id)
-            ?: return ResponseEntity.notFound().build()
-        return ResponseEntity.ok(attempt)
+        return try {
+            val attempt = quizAttemptService.getQuizAttemptById(id)
+            ResponseEntity.ok(attempt)
+        } catch (e: NoSuchElementException) {
+            ResponseEntity.notFound().build()
+        }
     }
     
     @GetMapping("/user/{userName}")

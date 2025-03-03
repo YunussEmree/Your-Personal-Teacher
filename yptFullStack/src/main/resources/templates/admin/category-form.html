@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title th:text="${category.id != null ? 'Edit Category' : 'Add New Category'}">Add/Edit Category</title>
+</head>
+<body>
+    <div layout:fragment="page-title" th:text="${category.id != null ? 'Edit Category' : 'Add New Category'}">
+        Add/Edit Category
+    </div>
+    
+    <div layout:fragment="content">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0" th:text="${category.id != null ? 'Edit Category - ' + category.name : 'Create New Category'}">
+                    Category Form
+                </h5>
+            </div>
+            <div class="card-body">
+                <form th:action="${category.id != null ? '/admin/categories/update/' + category.id : '/admin/categories/save'}" 
+                      method="post" 
+                      th:object="${category}">
+                    
+                    <!-- Display validation errors if any -->
+                    <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger mb-4">
+                        <ul class="mb-0">
+                            <li th:each="err : ${#fields.errors('*')}" th:text="${err}">Input is incorrect</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Category Name -->
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Category Name</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="name" 
+                               name="name" 
+                               th:field="*{name}" 
+                               th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'" 
+                               required>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">
+                            Please provide a valid name.
+                        </div>
+                    </div>
+                    
+                    <!-- Category Description -->
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" 
+                                  id="description" 
+                                  name="description" 
+                                  th:field="*{description}" 
+                                  th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'" 
+                                  rows="3"></textarea>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">
+                            Please provide a valid description.
+                        </div>
+                    </div>
+                    
+                    <!-- Form Buttons -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="/admin/categories" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            <span th:text="${category.id != null ? 'Update' : 'Save'}">Save</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

@@ -2,28 +2,82 @@ package com.yunussemree.ypt.service
 
 import com.yunussemree.ypt.model.*
 import com.yunussemree.ypt.repository.*
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 
 @Service
 class QuizAttemptService(
     private val quizRepository: QuizRepository,
     private val quizAttemptRepository: QuizAttemptRepository,
     private val questionRepository: QuestionRepository,
-    private val answerRepository: AnswerRepository
+    private val answerRepository: AnswerRepository,
+    private val quizResponseRepository: QuizResponseRepository
 ) {
     
-    fun getAllQuizAttempts(): List<QuizAttempt> = quizAttemptRepository.findAll()
+    fun getAllAttempts(): List<QuizAttempt> {
+        return quizAttemptRepository.findAll()
+    }
     
-    fun getQuizAttemptById(id: Long): QuizAttempt? = quizAttemptRepository.findById(id).orElse(null)
+    fun getAllAttempts(pageable: Pageable): Page<QuizAttempt> {
+        return quizAttemptRepository.findAll(pageable)
+    }
+    
+    fun getAttemptById(id: Long): QuizAttempt {
+        return quizAttemptRepository.findById(id).orElseThrow { NoSuchElementException("Quiz attempt not found with id: $id") }
+    }
+    
+    fun getQuizAttemptById(id: Long): QuizAttempt {
+        return quizAttemptRepository.findById(id).orElseThrow { NoSuchElementException("Quiz attempt not found with id: $id") }
+    }
+    
+    fun getAttemptsByQuiz(quizId: Long, pageable: Pageable): Page<QuizAttempt> {
+        return quizAttemptRepository.findByQuizId(quizId, pageable)
+    }
+    
+    fun getAttemptsByUsername(username: String, pageable: Pageable): Page<QuizAttempt> {
+        val lowerUsername = username.lowercase()
+        return quizAttemptRepository.findByUsernameContainingIgnoreCase(lowerUsername, pageable)
+    }
+    
+    fun getAttemptsByDate(date: LocalDate, pageable: Pageable): Page<QuizAttempt> {
+        val startOfDay = LocalDateTime.of(date, LocalTime.MIN)
+        val endOfDay = LocalDateTime.of(date, LocalTime.MAX)
+        return quizAttemptRepository.findByStartTimeBetween(startOfDay, endOfDay, pageable)
+    }
+    
+    fun saveAttempt(attempt: QuizAttempt): QuizAttempt {
+        return quizAttemptRepository.save(attempt)
+    }
+    
+    fun saveResponse(response: QuizResponse): QuizResponse {
+        return quizResponseRepository.save(response)
+    }
+    
+    @Transactional
+    fun deleteAttempt(id: Long) {
+        val attempt = getAttemptById(id)
+        quizAttemptRepository.delete(attempt)
+    }
+    
+    fun countAttempts(): Long {
+        return quizAttemptRepository.count()
+    }
+    
+    fun getAllQuizAttempts(): List<QuizAttempt> = quizAttemptRepository.findAll()
     
     fun getQuizAttemptsByUser(userName: String): List<QuizAttempt> = quizAttemptRepository.findByUserName(userName)
     
     fun getQuizAttemptsByQuiz(quizId: Long): List<QuizAttempt> = quizAttemptRepository.findByQuizId(quizId)
     
-    fun getQuizAttemptsByQuizAndUser(quizId: Long, userName: String): List<QuizAttempt> = 
-        quizAttemptRepository.findByQuizIdAndUserName(quizId, userName)
+    fun getQuizAttemptsByQuizAndUser(quizId: Long, userName: String): List<QuizAttempt> {
+        val quizAttempts = quizAttemptRepository.findByQuizId(quizId)
+        return quizAttempts.filter { it.userName == userName }
+    }
     
     @Transactional
     fun startQuizAttempt(quizId: Long, userName: String): QuizAttempt {

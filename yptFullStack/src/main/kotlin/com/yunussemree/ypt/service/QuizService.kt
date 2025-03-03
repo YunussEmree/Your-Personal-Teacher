@@ -5,9 +5,12 @@ import com.yunussemree.ypt.model.Question
 import com.yunussemree.ypt.repository.QuizRepository
 import com.yunussemree.ypt.repository.CategoryRepository
 import com.yunussemree.ypt.repository.QuestionRepository
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
+import java.util.NoSuchElementException
 
 @Service
 class QuizService(
@@ -18,11 +21,19 @@ class QuizService(
     
     fun getAllQuizzes(): List<Quiz> = quizRepository.findAll()
     
-    fun getActiveQuizzes(): List<Quiz> = quizRepository.findByIsActiveTrue()
+    fun getAllQuizzes(pageable: Pageable): Page<Quiz> = quizRepository.findAll(pageable)
     
-    fun getQuizById(id: Long): Quiz? = quizRepository.findById(id).orElse(null)
+    fun getQuizById(id: Long): Quiz = quizRepository.findById(id).orElseThrow { NoSuchElementException("Quiz not found with id: $id") }
+    
+    fun getQuizzesByCategory(categoryId: Long, pageable: Pageable): Page<Quiz> = quizRepository.findByCategoryId(categoryId, pageable)
     
     fun getQuizzesByCategory(categoryId: Long): List<Quiz> = quizRepository.findByCategoryId(categoryId)
+    
+    fun searchQuizzes(query: String, pageable: Pageable): Page<Quiz> = quizRepository.findByTitleContainingIgnoreCase(query, pageable)
+    
+    fun getActiveQuizzes(pageable: Pageable): Page<Quiz> = quizRepository.findByIsActiveTrue(pageable)
+    
+    fun getActiveQuizzes(): List<Quiz> = quizRepository.findByIsActiveTrue()
     
     fun searchQuizzesByTitle(title: String): List<Quiz> = quizRepository.findByTitleContainingIgnoreCase(title)
     
@@ -129,5 +140,15 @@ class QuizService(
     fun deleteQuiz(id: Long) {
         val quiz = getQuizById(id) ?: throw RuntimeException("Quiz not found with id: $id")
         quizRepository.delete(quiz)
+    }
+
+    fun countQuizzes(): Long {
+        return quizRepository.count()
+    }
+
+    fun getQuizzesByQuestionId(questionId: Long): List<Quiz> {
+        return quizRepository.findAll().filter { quiz ->
+            quiz.questions?.any { it.id == questionId } ?: false
+        }
     }
 } 

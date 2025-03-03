@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>Category Details</title>
+    <style>
+        .category-info {
+            background-color: #f8f9fa;
+            border-radius: 0.25rem;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .category-info .label {
+            font-weight: 500;
+            color: #6c757d;
+        }
+        .category-info .value {
+            font-weight: 400;
+        }
+        .question-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-left: 3px solid #0d6efd;
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="page-title">
+        Category Details
+    </div>
+    
+    <div layout:fragment="content">
+        <!-- Alert Messages -->
+        <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${message}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <!-- Category Information -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0" th:text="${category.name}">Category Name</h5>
+                <div>
+                    <a th:href="@{/admin/categories/edit/{id}(id=${category.id})}" class="btn btn-sm btn-outline-primary me-2">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <a href="/admin/categories" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="category-info">
+                    <div class="row mb-2">
+                        <div class="col-md-3">
+                            <span class="label">ID:</span>
+                        </div>
+                        <div class="col-md-9">
+                            <span class="value" th:text="${category.id}">1</span>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-3">
+                            <span class="label">Name:</span>
+                        </div>
+                        <div class="col-md-9">
+                            <span class="value" th:text="${category.name}">Programming</span>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-3">
+                            <span class="label">Description:</span>
+                        </div>
+                        <div class="col-md-9">
+                            <span class="value" th:text="${category.description != null && !category.description.empty ? category.description : 'No description'}">
+                                This category contains programming-related questions.
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <span class="label">Questions:</span>
+                        </div>
+                        <div class="col-md-9">
+                            <span class="value" th:text="${category.questions != null ? category.questions.size() : 0}">5</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Category Questions -->
+                <h6 class="mb-3">Questions in this Category</h6>
+                <div th:if="${category.questions == null || category.questions.empty}" class="alert alert-info">
+                    This category has no questions.
+                </div>
+                
+                <div th:each="question, qStat : ${category.questions}" class="question-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <span class="fw-bold" th:text="${qStat.count + '. ' + question.text}">1. What is Java?</span>
+                            <div class="mt-2 small">
+                                <span th:text="${'Answers: ' + (question.answers != null ? question.answers.size() : 0)}">Answers: 4</span>
+                            </div>
+                        </div>
+                        <div>
+                            <a th:href="@{/admin/questions/view/{id}(id=${question.id})}" class="btn btn-sm btn-outline-info">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Add Question Button -->
+                <div class="mt-4">
+                    <a href="/admin/questions/new" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add New Question
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

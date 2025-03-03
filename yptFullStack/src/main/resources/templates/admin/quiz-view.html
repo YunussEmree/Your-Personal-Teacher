@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>Quiz Details</title>
+    <style>
+        .quiz-info {
+            background-color: #f8f9fa;
+            border-radius: 0.25rem;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .quiz-info .label {
+            font-weight: 500;
+            color: #6c757d;
+        }
+        .quiz-info .value {
+            font-weight: 400;
+        }
+        .question-card {
+            margin-bottom: 15px;
+            border-left: 3px solid #0d6efd;
+        }
+        .answer-item {
+            padding: 8px 15px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+        }
+        .correct-answer {
+            background-color: rgba(25, 135, 84, 0.1);
+            border-left: 3px solid #198754;
+        }
+        .incorrect-answer {
+            background-color: #fff;
+            border-left: 3px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="page-title">
+        Quiz Details
+    </div>
+    
+    <div layout:fragment="content">
+        <!-- Alert Messages -->
+        <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${message}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <!-- Quiz Information -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0" th:text="${quiz.title}">Quiz Title</h5>
+                <div>
+                    <a th:href="@{/admin/quizzes/edit/{id}(id=${quiz.id})}" class="btn btn-sm btn-outline-primary me-2">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <a href="/admin/quizzes" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="quiz-info">
+                    <div class="row mb-2">
+                        <div class="col-md-3">
+                            <span class="label">ID:</span>
+                        </div>
+                        <div class="col-md-9">
+                            <span class="value" th:text="${quiz.id}">1</span>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-3">
+                            <span class="label">Title:</span>
+                        </div>
+                        <div class="col-md-9">
+                            <span class="value" th:text="${quiz.title}">Java Basics Quiz</span>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-3">
+                            <span class="label">Description:</span>
+                        </div>
+                        <div class="col-md-9">
+                            <span class="value" th:text="${quiz.description != null && !quiz.description.empty ? quiz.description : 'No description'}">
+                                This quiz tests your knowledge of Java basics.
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-3">
+                            <span class="label">Category:</span>
+                        </div>
+                        <div class="col-md-9">
+                            <span class="value" th:text="${quiz.category != null ? quiz.category.name : 'No Category'}">Programming</span>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-3">
+                            <span class="label">Status:</span>
+                        </div>
+                        <div class="col-md-9">
+                            <span class="badge" th:classappend="${quiz.active ? 'bg-success' : 'bg-secondary'}" 
+                                  th:text="${quiz.active ? 'Active' : 'Inactive'}">Active</span>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-3">
+                            <span class="label">Time Limit:</span>
+                        </div>
+                        <div class="col-md-9">
+                            <span class="value" th:text="${quiz.timeLimit != null ? quiz.timeLimit + ' minutes' : 'No time limit'}">10 minutes</span>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-3">
+                            <span class="label">Questions:</span>
+                        </div>
+                        <div class="col-md-9">
+                            <span class="value" th:text="${quiz.questions != null ? quiz.questions.size() : 0}">10</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <span class="label">Attempts:</span>
+                        </div>
+                        <div class="col-md-9">
+                            <span class="value" th:text="${quiz.attempts != null ? quiz.attempts.size() : 0}">5</span>
+                            <a th:if="${quiz.attempts != null && !quiz.attempts.empty}" 
+                               th:href="@{/admin/attempts(quizId=${quiz.id})}" 
+                               class="btn btn-sm btn-link">
+                                View Attempts
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quiz Questions -->
+                <h6 class="mb-3">Questions</h6>
+                <div th:if="${quiz.questions == null || quiz.questions.empty}" class="alert alert-info">
+                    This quiz has no questions.
+                </div>
+                
+                <div th:each="question, qStat : ${quiz.questions}" class="card question-card">
+                    <div class="card-header bg-light">
+                        <span class="fw-bold" th:text="${qStat.count + '. ' + question.text}">1. What is Java?</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="small text-muted" th:text="${'Category: ' + (question.category != null ? question.category.name : 'No Category')}">
+                            Category: Programming
+                        </p>
+                        
+                        <div class="mt-2">
+                            <p class="mb-2">Answers:</p>
+                            <div th:if="${question.answers == null || question.answers.empty}" class="alert alert-warning">
+                                This question has no answers.
+                            </div>
+                            <div th:each="answer : ${question.answers}" 
+                                 th:class="${answer.correct ? 'answer-item correct-answer' : 'answer-item incorrect-answer'}">
+                                <span th:text="${answer.text}">Java is a programming language</span>
+                                <span th:if="${answer.correct}" class="ms-2 badge bg-success">Correct</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

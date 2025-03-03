@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>Quiz Attempt Details</title>
+    <style>
+        .attempt-info {
+            background-color: #f8f9fa;
+            border-radius: 0.25rem;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .attempt-info .label {
+            font-weight: 500;
+            color: #6c757d;
+        }
+        .attempt-info .value {
+            font-weight: 400;
+        }
+        .response-card {
+            margin-bottom: 15px;
+            border-left: 3px solid #0d6efd;
+        }
+        .response-card.correct {
+            border-left-color: #198754;
+        }
+        .response-card.incorrect {
+            border-left-color: #dc3545;
+        }
+        .answer-item {
+            padding: 8px 15px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+        }
+        .correct-answer {
+            background-color: rgba(25, 135, 84, 0.1);
+            border-left: 3px solid #198754;
+        }
+        .incorrect-answer {
+            background-color: #fff;
+            border-left: 3px solid #dee2e6;
+        }
+        .selected-answer {
+            border: 2px solid #0d6efd;
+        }
+        .score-badge {
+            font-size: 1.2rem;
+            padding: 8px 15px;
+        }
+        .score-high {
+            background-color: #198754;
+        }
+        .score-medium {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .score-low {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="page-title">
+        Quiz Attempt Details
+    </div>
+    
+    <div layout:fragment="content">
+        <!-- Alert Messages -->
+        <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${message}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <!-- Attempt Information -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0" th:text="${'Attempt for: ' + attempt.quiz.title}">Attempt for: Java Basics Quiz</h5>
+                <div>
+                    <a th:href="@{/admin/attempts}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Attempts
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="attempt-info">
+                    <div class="row mb-2">
+                        <div class="col-md-3">
+                            <span class="label">Attempt ID:</span>
+                        </div>
+                        <div class="col-md-9">
+                            <span class="value" th:text="${attempt.id}">1</span>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-3">
+                            <span class="label">Quiz:</span>
+                        </div>
+                        <div class="col-md-9">
+                            <a th:href="@{/admin/quizzes/view/{id}(id=${attempt.quiz.id})}" 
+                               th:text="${attempt.quiz.title}">
+                                Java Basics Quiz
+                            </a>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-3">
+                            <span class="label">User:</span>
+                        </div>
+                        <div class="col-md-9">
+                            <span class="value" th:text="${attempt.username != null ? attempt.username : 'Anonymous'}">john_doe</span>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-3">
+                            <span class="label">Start Time:</span>
+                        </div>
+                        <div class="col-md-9">
+                            <span class="value" th:text="${#temporals.format(attempt.startTime, 'yyyy-MM-dd HH:mm:ss')}">2023-01-01 10:00:00</span>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-3">
+                            <span class="label">End Time:</span>
+                        </div>
+                        <div class="col-md-9">
+                            <span class="value" th:text="${attempt.endTime != null ? #temporals.format(attempt.endTime, 'yyyy-MM-dd HH:mm:ss') : 'In Progress'}">
+                                2023-01-01 10:30:00
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-3">
+                            <span class="label">Duration:</span>
+                        </div>
+                        <div class="col-md-9">
+                            <span class="value" th:if="${attempt.endTime != null}" 
+                                  th:with="duration=${T(java.time.Duration).between(attempt.startTime, attempt.endTime)}"
+                                  th:text="${duration.toMinutes() + ' minutes ' + (duration.toSeconds() % 60) + ' seconds'}">
+                                30 minutes 0 seconds
+                            </span>
+                            <span class="value" th:unless="${attempt.endTime != null}">In Progress</span>
+                        </div>
+                    </div>
+                    <div class="row mb-2" th:if="${attempt.endTime != null}">
+                        <div class="col-md-3">
+                            <span class="label">Score:</span>
+                        </div>
+                        <div class="col-md-9">
+                            <span class="badge score-badge" 
+                                  th:classappend="${attempt.score >= 80 ? 'score-high' : (attempt.score >= 50 ? 'score-medium' : 'score-low')}"
+                                  th:text="${attempt.score + '%'}">
+                                85%
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row mb-2" th:if="${attempt.endTime != null}">
+                        <div class="col-md-3">
+                            <span class="label">Correct Answers:</span>
+                        </div>
+                        <div class="col-md-9">
+                            <span class="value" th:text="${correctCount + ' out of ' + totalQuestions}">8 out of 10</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quiz Responses -->
+                <h6 class="mb-3">Responses</h6>
+                <div th:if="${responses.empty}" class="alert alert-info">
+                    No responses recorded for this attempt.
+                </div>
+                
+                <div th:each="response, rStat : ${responses}" 
+                     class="card response-card" 
+                     th:classappend="${response.correct ? 'correct' : 'incorrect'}">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <span class="fw-bold" th:text="${rStat.count + '. ' + response.question.text}">1. What is Java?</span>
+                        <span th:if="${response.correct}" class="badge bg-success">Correct</span>
+                        <span th:unless="${response.correct}" class="badge bg-danger">Incorrect</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="small text-muted" th:text="${'Category: ' + (response.question.category != null ? response.question.category.name : 'No Category')}">
+                            Category: Programming
+                        </p>
+                        
+                        <div class="mt-2">
+                            <p class="mb-2">Answers:</p>
+                            <div th:each="answer : ${response.question.answers}" 
+                                 th:class="${answer.correct ? 'answer-item correct-answer' : 'answer-item incorrect-answer'} + 
+                                           ${answer.id == response.answer.id ? ' selected-answer' : ''}">
+                                <span th:text="${answer.text}">Java is a programming language</span>
+                                <span th:if="${answer.correct}" class="ms-2 badge bg-success">Correct Answer</span>
+                                <span th:if="${answer.id == response.answer.id && !answer.correct}" class="ms-2 badge bg-danger">Selected (Wrong)</span>
+                                <span th:if="${answer.id == response.answer.id && answer.correct}" class="ms-2 badge bg-primary">Selected</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

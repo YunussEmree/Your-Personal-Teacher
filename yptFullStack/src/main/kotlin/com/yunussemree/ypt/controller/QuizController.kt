@@ -5,6 +5,7 @@ import com.yunussemree.ypt.service.QuizService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.util.NoSuchElementException
 
 @RestController
 @RequestMapping("/api/quizzes")
@@ -24,9 +25,12 @@ class QuizController(private val quizService: QuizService) {
 
     @GetMapping("/{id}")
     fun getQuizById(@PathVariable id: Long): ResponseEntity<Quiz> {
-        val quiz = quizService.getQuizById(id)
-            ?: return ResponseEntity.notFound().build()
-        return ResponseEntity.ok(quiz)
+        return try {
+            val quiz = quizService.getQuizById(id)
+            ResponseEntity.ok(quiz)
+        } catch (e: NoSuchElementException) {
+            ResponseEntity.notFound().build()
+        }
     }
     
     @GetMapping("/category/{categoryId}")
