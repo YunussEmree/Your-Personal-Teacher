@@ -41,7 +41,7 @@ class QuizAttemptService(
     
     fun getAttemptsByUsername(username: String, pageable: Pageable): Page<QuizAttempt> {
         val lowerUsername = username.lowercase()
-        return quizAttemptRepository.findByUsernameContainingIgnoreCase(lowerUsername, pageable)
+        return quizAttemptRepository.findByUserNameContainingIgnoreCase(lowerUsername, pageable)
     }
     
     fun getAttemptsByDate(date: LocalDate, pageable: Pageable): Page<QuizAttempt> {
