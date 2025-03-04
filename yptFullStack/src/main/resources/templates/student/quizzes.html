@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{student/layout}">
+<head>
+    <title>Available Quizzes</title>
+</head>
+<body>
+    <div layout:fragment="page-title">
+        Available Quizzes
+    </div>
+
+    <div layout:fragment="content">
+        <!-- Search and Filter -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Search & Filter</h5>
+                        <form th:action="@{/student/quizzes}" method="get" class="row g-3">
+                            <div class="col-md-4">
+                                <label for="search" class="form-label">Search:</label>
+                                <input type="text" class="form-control" id="search" name="search" 
+                                       th:value="${search}" placeholder="Quiz title...">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="categoryId" class="form-label">Category:</label>
+                                <select class="form-select" id="categoryId" name="categoryId">
+                                    <option value="">All Categories</option>
+                                    <option th:each="cat : ${categories}" 
+                                            th:value="${cat.id}" 
+                                            th:text="${cat.name}"
+                                            th:selected="${categoryId != null && categoryId == cat.id}">
+                                        Category Name
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary me-2">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                                <a th:href="@{/student/quizzes}" class="btn btn-secondary">
+                                    <i class="fas fa-redo"></i> Reset
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quiz List -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2>Browse Quizzes</h2>
+                <hr>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <!-- No quizzes message -->
+                <div class="alert alert-info" th:if="${#lists.isEmpty(quizzes)}">
+                    <i class="fas fa-info-circle"></i> No quizzes found matching your criteria.
+                </div>
+                
+                <!-- Quiz cards -->
+                <div class="row row-cols-1 row-cols-md-3 g-4">
+                    <div class="col" th:each="quiz : ${quizzes}">
+                        <div class="card h-100">
+                            <div class="card-header bg-transparent">
+                                <span class="badge bg-info" th:text="${quiz.category?.name}">Category</span>
+                                <span class="badge bg-secondary float-end" th:text="${quiz.questions?.size + ' Questions'}">10 Questions</span>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title" th:text="${quiz.title}">Quiz Title</h5>
+                                <p class="card-text" th:text="${quiz.description}">Quiz description goes here.</p>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <a th:href="@{/student/quiz/{id}(id=${quiz.id})}" class="btn btn-primary w-100">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pagination -->
+                <div class="row mt-4" th:if="${totalPages > 1}">
+                    <div class="col-12">
+                        <nav>
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+                                    <a class="page-link" th:href="@{/student/quizzes(page=${currentPage - 1}, size=${size}, categoryId=${categoryId}, search=${search})}">
+                                        Previous
+                                    </a>
+                                </li>
+                                
+                                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" 
+                                    th:classappend="${currentPage == i} ? 'active' : ''">
+                                    <a class="page-link" th:href="@{/student/quizzes(page=${i}, size=${size}, categoryId=${categoryId}, search=${search})}" 
+                                       th:text="${i + 1}">1</a>
+                                </li>
+                                
+                                <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled' : ''">
+                                    <a class="page-link" th:href="@{/student/quizzes(page=${currentPage + 1}, size=${size}, categoryId=${categoryId}, search=${search})}">
+                                        Next
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

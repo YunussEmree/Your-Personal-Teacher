@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{student/layout}">
+<head>
+    <title>Student Dashboard</title>
+</head>
+<body>
+    <div layout:fragment="page-title">
+        Welcome to Your Learning Journey
+    </div>
+
+    <div layout:fragment="content">
+        <!-- Username form for quiz tracking -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h5 class="card-title">Enter Your Username</h5>
+                        <p class="card-text">Please provide your username to track your quiz progress.</p>
+                        <form id="usernameForm" class="row g-3">
+                            <div class="col-auto">
+                                <input type="text" class="form-control" id="username" placeholder="Username" required>
+                            </div>
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-primary">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h5 class="card-title">Your Statistics</h5>
+                        <p class="card-text">View your quiz history and see your progress.</p>
+                        <a href="#" id="viewHistoryLink" class="btn btn-primary disabled">View My History</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Featured Quizzes Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2>Featured Quizzes</h2>
+            </div>
+        </div>
+        
+        <div class="row row-cols-1 row-cols-md-3 g-4 mb-4">
+            <div class="col" th:each="quiz : ${quizzes}" th:if="${quiz.isActive}">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${quiz.title}">Quiz Title</h5>
+                        <p class="card-text" th:text="${quiz.description}">Quiz description goes here.</p>
+                        <p class="card-text">
+                            <span class="badge bg-info" th:text="${quiz.category?.name}">Category</span>
+                            <span class="badge bg-secondary" th:text="${quiz.questions?.size + ' Questions'}">10 Questions</span>
+                        </p>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <a th:href="@{/student/quiz/{id}(id=${quiz.id})}" class="btn btn-primary">View Quiz</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Categories Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2>Browse by Category</h2>
+            </div>
+        </div>
+        
+        <div class="row row-cols-1 row-cols-md-4 g-4">
+            <div class="col" th:each="category : ${categories}">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${category.name}">Category Name</h5>
+                        <p class="card-text" th:text="${category.description}">Category description.</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <a th:href="@{/student/quizzes(categoryId=${category.id})}" class="btn btn-outline-primary">Browse Quizzes</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <th:block layout:fragment="scripts">
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Check if username is already stored
+                const storedUsername = localStorage.getItem('quiz_username');
+                if (storedUsername) {
+                    document.getElementById('username').value = storedUsername;
+                    enableHistoryLink(storedUsername);
+                }
+                
+                // Handle username form submission
+                document.getElementById('usernameForm').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const username = document.getElementById('username').value.trim();
+                    if (username) {
+                        localStorage.setItem('quiz_username', username);
+                        enableHistoryLink(username);
+                        alert('Username saved successfully!');
+                    }
+                });
+                
+                // Enable history link
+                function enableHistoryLink(username) {
+                    const historyLink = document.getElementById('viewHistoryLink');
+                    historyLink.classList.remove('disabled');
+                    historyLink.href = `/student/history?userName=${username}`;
+                }
+            });
+        </script>
+    </th:block>
+</body>
+</html> 

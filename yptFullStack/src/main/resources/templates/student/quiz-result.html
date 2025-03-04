@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{student/layout}">
+<head>
+    <title>Quiz Results</title>
+    <style>
+        .result-header {
+            text-align: center;
+            padding: 2rem 0;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+        
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem auto;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .score-circle.high {
+            background-color: #28a745;
+        }
+        
+        .score-circle.medium {
+            background-color: #ffc107;
+        }
+        
+        .score-circle.low {
+            background-color: #dc3545;
+        }
+        
+        .question-result {
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .question-result.correct {
+            border-left: 5px solid #28a745;
+        }
+        
+        .question-result.incorrect {
+            border-left: 5px solid #dc3545;
+        }
+        
+        .answer-item {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-radius: 5px;
+        }
+        
+        .answer-item.selected {
+            font-weight: bold;
+        }
+        
+        .answer-item.correct {
+            background-color: rgba(40, 167, 69, 0.1);
+            border: 1px solid rgba(40, 167, 69, 0.2);
+        }
+        
+        .answer-item.incorrect {
+            background-color: rgba(220, 53, 69, 0.1);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="page-title">
+        Quiz Results
+    </div>
+
+    <div layout:fragment="content">
+        <div class="result-header">
+            <div th:with="scoreClass=${scorePercentage >= 80 ? 'high' : (scorePercentage >= 60 ? 'medium' : 'low')}">
+                <div class="score-circle" th:classappend="${scoreClass}" th:text="${scorePercentage + '%'}">85%</div>
+                <h2 th:text="${attempt.quiz.title}">Quiz Title</h2>
+                <p class="text-muted">
+                    <span th:text="${correctCount}">8</span> out of 
+                    <span th:text="${totalQuestions}">10</span> questions answered correctly
+                </p>
+                <div class="mt-3">
+                    <span class="badge bg-info" th:text="${attempt.quiz.category?.name}">Category</span>
+                    <span class="badge bg-secondary" th:text="${#temporals.format(attempt.startTime, 'dd MMM yyyy HH:mm')}">01 Jan 2025</span>
+                    <span class="badge bg-secondary" th:if="${attempt.endTime}" 
+                          th:text="'Duration: ' + ${#temporals.minutesBetween(attempt.startTime, attempt.endTime)} + ' min'">
+                        Duration: 5 min
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Summary</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-4">
+                                <div class="p-3">
+                                    <div class="display-4 text-success" th:text="${correctCount}">8</div>
+                                    <p class="mb-0">Correct Answers</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-3">
+                                    <div class="display-4 text-danger" th:text="${totalQuestions - correctCount}">2</div>
+                                    <p class="mb-0">Incorrect Answers</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-3">
+                                    <div class="display-4 text-info" th:text="${scorePercentage + '%'}">80%</div>
+                                    <p class="mb-0">Score</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer text-center">
+                        <a th:href="@{/student/quizzes}" class="btn btn-primary me-2">
+                            <i class="fas fa-list"></i> Browse More Quizzes
+                        </a>
+                        <a th:href="@{/student/quiz/{id}(id=${attempt.quiz.id})}" class="btn btn-outline-secondary">
+                            <i class="fas fa-redo"></i> Retake Quiz
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Detailed Results -->
+        <h3 class="mb-4">Detailed Results</h3>
+        
+        <div th:each="response, respStat : ${responses}" class="question-result"
+             th:classappend="${response.isCorrect ? 'correct' : 'incorrect'}">
+            <div class="d-flex justify-content-between">
+                <h4 class="mb-3">
+                    Question <span th:text="${respStat.count}">1</span>
+                </h4>
+                <span class="badge" th:classappend="${response.isCorrect ? 'bg-success' : 'bg-danger'}" 
+                      th:text="${response.isCorrect ? 'Correct' : 'Incorrect'}">Correct</span>
+            </div>
+            
+            <p class="question-text mb-3" th:text="${response.question.text}">Question text goes here?</p>
+            
+            <div class="answers-container">
+                <div th:each="answer : ${response.question.answers}" class="answer-item"
+                     th:classappend="${answer.id == response.answer.id ? (response.isCorrect ? 'selected correct' : 'selected incorrect') : (answer.isCorrect ? 'correct' : '')}">
+                    <div class="d-flex align-items-center">
+                        <div class="me-2">
+                            <i th:if="${answer.id == response.answer.id && response.isCorrect}" class="fas fa-check-circle text-success"></i>
+                            <i th:if="${answer.id == response.answer.id && !response.isCorrect}" class="fas fa-times-circle text-danger"></i>
+                            <i th:if="${answer.id != response.answer.id && answer.isCorrect}" class="fas fa-check-circle text-success"></i>
+                            <i th:if="${answer.id != response.answer.id && !answer.isCorrect}" class="far fa-circle text-muted"></i>
+                        </div>
+                        <div th:text="${answer.text}">Answer text</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{student/layout}">
+<head>
+    <title>Quiz Details</title>
+</head>
+<body>
+    <div layout:fragment="page-title">
+        Quiz Details
+    </div>
+
+    <div layout:fragment="content">
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Quiz Information -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="card-title mb-0" th:text="${quiz.title}">Quiz Title</h4>
+                            <span class="badge bg-info" th:text="${quiz.category?.name}">Category</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text" th:text="${quiz.description}">Quiz description goes here.</p>
+                        
+                        <hr>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Quiz Details</h5>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Number of Questions
+                                        <span class="badge bg-primary rounded-pill" th:text="${quiz.questions?.size ?: 0}">10</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Created On
+                                        <span th:text="${#temporals.format(quiz.createdAt, 'dd MMM yyyy')}">01 Jan 2025</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Quiz Instructions</h5>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">Read each question carefully</li>
+                                    <li class="list-group-item">Select the correct answer for each question</li>
+                                    <li class="list-group-item">You can't go back to previous questions</li>
+                                    <li class="list-group-item">Results will be shown at the end</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="button" class="btn btn-lg btn-success" data-bs-toggle="modal" data-bs-target="#startQuizModal">
+                            <i class="fas fa-play-circle"></i> Start Quiz
+                        </button>
+                        <a th:href="@{/student/quizzes}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Quizzes
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <!-- Category Information -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title">Category</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6 th:text="${quiz.category?.name}">Category Name</h6>
+                        <p th:text="${quiz.category?.description}">Category description goes here.</p>
+                        <a th:href="@{/student/quizzes(categoryId=${quiz.category?.id})}" class="btn btn-outline-primary">
+                            <i class="fas fa-th-list"></i> More Quizzes in this Category
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Related Quizzes (Placeholder for future implementation) -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">You May Also Like</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Explore more quizzes to enhance your learning journey.</p>
+                        <a th:href="@{/student/quizzes}" class="btn btn-outline-primary">
+                            <i class="fas fa-search"></i> Explore Quizzes
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Start Quiz Modal -->
+        <div class="modal fade" id="startQuizModal" tabindex="-1" aria-labelledby="startQuizModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="startQuizModalLabel">Start Quiz</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Please enter your username to start the quiz.</p>
+                        <form th:action="@{/student/quiz/{id}/start(id=${quiz.id})}" method="get" id="startQuizForm">
+                            <div class="mb-3">
+                                <label for="userName" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="userName" name="userName" required>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" form="startQuizForm" class="btn btn-success">Start Quiz</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <th:block layout:fragment="scripts">
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Check if username is already stored
+                const storedUsername = localStorage.getItem('quiz_username');
+                if (storedUsername) {
+                    document.getElementById('userName').value = storedUsername;
+                }
+                
+                // Set username when modal is shown
+                const startQuizModal = document.getElementById('startQuizModal');
+                startQuizModal.addEventListener('shown.bs.modal', function () {
+                    if (storedUsername) {
+                        document.getElementById('userName').value = storedUsername;
+                    }
+                    document.getElementById('userName').focus();
+                });
+            });
+        </script>
+    </th:block>
+</body>
+</html> 

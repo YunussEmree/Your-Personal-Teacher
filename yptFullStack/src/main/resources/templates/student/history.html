@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{student/layout}">
+<head>
+    <title>Quiz History</title>
+    <style>
+        .history-card {
+            transition: transform 0.3s;
+        }
+        
+        .history-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .score-badge {
+            font-size: 1rem;
+            padding: 0.35rem 0.65rem;
+        }
+        
+        .score-badge.high {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .score-badge.medium {
+            background-color: #ffc107;
+            color: #343a40;
+        }
+        
+        .score-badge.low {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .empty-history {
+            text-align: center;
+            padding: 3rem;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            margin: 2rem 0;
+        }
+        
+        .empty-history i {
+            font-size: 4rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="page-title">
+        Quiz History for <span th:text="${userName}">Student</span>
+    </div>
+
+    <div layout:fragment="content">
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h3 class="card-title mb-0">Your Quiz Attempts</h3>
+                        <a th:href="@{/student/quizzes}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus-circle"></i> Take New Quiz
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <!-- Empty state -->
+                        <div th:if="${attempts.empty}" class="empty-history">
+                            <i class="fas fa-history"></i>
+                            <h3>No Quiz Attempts Yet</h3>
+                            <p class="text-muted">You haven't taken any quizzes yet. Start your learning journey by taking your first quiz!</p>
+                            <a th:href="@{/student/quizzes}" class="btn btn-primary mt-3">
+                                <i class="fas fa-play-circle"></i> Take Your First Quiz
+                            </a>
+                        </div>
+                        
+                        <!-- Quiz attempts list -->
+                        <div th:if="${!attempts.empty}" class="row">
+                            <div th:each="attempt : ${attempts}" class="col-md-6 mb-4">
+                                <div class="card h-100 history-card">
+                                    <div class="card-body">
+                                        <h5 class="card-title" th:text="${attempt.quiz.title}">Quiz Title</h5>
+                                        <p class="text-muted">
+                                            <span class="badge bg-info" th:text="${attempt.quiz.category?.name}">Category</span>
+                                            <span class="badge bg-secondary" th:text="${#temporals.format(attempt.startTime, 'dd MMM yyyy HH:mm')}">Date</span>
+                                        </p>
+                                        
+                                        <div class="d-flex justify-content-between align-items-center mt-3">
+                                            <div>
+                                                <div th:with="correctCount=${attempt.responses.?[isCorrect].size()}, 
+                                                              totalQuestions=${attempt.quiz.questions.size()}, 
+                                                              scorePercentage=${totalQuestions > 0 ? (correctCount * 100) / totalQuestions : 0},
+                                                              scoreClass=${scorePercentage >= 80 ? 'high' : (scorePercentage >= 60 ? 'medium' : 'low')}">
+                                                    <span class="score-badge" th:classappend="${'score-badge ' + scoreClass}" 
+                                                          th:text="${scorePercentage + '%'}">85%</span>
+                                                    <span class="ms-2" th:text="${correctCount + ' / ' + totalQuestions}">8/10</span>
+                                                </div>
+                                                <small class="text-muted d-block mt-1" th:if="${attempt.endTime}">
+                                                    Completed in 
+                                                    <span th:text="${#temporals.minutesBetween(attempt.startTime, attempt.endTime)}">5</span> min
+                                                </small>
+                                            </div>
+                                            <a th:href="@{/student/quiz/{quizId}/result(quizId=${attempt.quiz.id}, attemptId=${attempt.id})}" 
+                                               class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-eye"></i> View Results
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div th:if="${totalPages > 1}" class="card-footer bg-white">
+                        <nav aria-label="Quiz history pagination">
+                            <ul class="pagination justify-content-center mb-0">
+                                <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                                    <a class="page-link" th:href="@{/student/history(userName=${userName}, page=${currentPage - 1}, size=${size})}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                                <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}" class="page-item" th:classappend="${i == currentPage ? 'active' : ''}">
+                                    <a class="page-link" th:href="@{/student/history(userName=${userName}, page=${i}, size=${size})}" th:text="${i + 1}">1</a>
+                                </li>
+                                <li class="page-item" th:classappend="${currentPage >= totalPages - 1 ? 'disabled' : ''}">
+                                    <a class="page-link" th:href="@{/student/history(userName=${userName}, page=${currentPage + 1}, size=${size})}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Summary stats card -->
+        <div th:if="${!attempts.empty}" class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h3 class="card-title mb-0">Your Progress Summary</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-3">
+                                <div class="p-3">
+                                    <div class="display-4" th:text="${attempts.size()}">10</div>
+                                    <p class="mb-0">Quizzes Taken</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3">
+                                    <div class="display-4 text-primary">
+                                        <span th:with="completedCount=${attempts.?[isCompleted].size()}"
+                                              th:text="${completedCount}">8</span>
+                                    </div>
+                                    <p class="mb-0">Completed</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3">
+                                    <div class="display-4 text-success">
+                                        <span th:with="topScoreCount=${attempts.?[responses.?[isCorrect].size() >= (quiz.questions.size() * 0.8)].size()}"
+                                              th:text="${topScoreCount}">5</span>
+                                    </div>
+                                    <p class="mb-0">Top Scores (≥80%)</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3">
+                                    <div class="display-4 text-info">
+                                        <span th:with="uniqueCategories=${#lists.toSet(attempts.![quiz.category.name])}"
+                                              th:text="${uniqueCategories.size()}">3</span>
+                                    </div>
+                                    <p class="mb-0">Categories Explored</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

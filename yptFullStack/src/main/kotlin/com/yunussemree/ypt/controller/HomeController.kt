@@ -1,6 +1,7 @@
 package com.yunussemree.ypt.controller
 
 import org.springframework.stereotype.Controller
+import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 
@@ -9,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 class HomeController {
 
     @GetMapping
-    fun home(): String {
-        // Redirect to admin dashboard
-        return "redirect:/admin"
+    fun home(model: Model): String {
+        model.addAttribute("pageTitle", "Your Personal Teacher - Quiz Platform")
+        return "home"
     }
 } 

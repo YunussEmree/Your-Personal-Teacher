@@ -35,6 +35,12 @@ class QuizService(
     
     fun getActiveQuizzes(): List<Quiz> = quizRepository.findByIsActiveTrue()
     
+    fun getActiveQuizzesByCategory(categoryId: Long, pageable: Pageable): Page<Quiz> = 
+        quizRepository.findByCategoryIdAndIsActiveTrue(categoryId, pageable)
+    
+    fun searchActiveQuizzes(query: String, pageable: Pageable): Page<Quiz> = 
+        quizRepository.findByTitleContainingIgnoreCaseAndIsActiveTrue(query, pageable)
+    
     fun searchQuizzesByTitle(title: String): List<Quiz> = quizRepository.findByTitleContainingIgnoreCase(title)
     
     @Transactional
@@ -147,8 +153,6 @@ class QuizService(
     }
 
     fun getQuizzesByQuestionId(questionId: Long): List<Quiz> {
-        return quizRepository.findAll().filter { quiz ->
-            quiz.questions?.any { it.id == questionId } ?: false
-        }
+        return quizRepository.findByQuestionsId(questionId)
     }
 } 

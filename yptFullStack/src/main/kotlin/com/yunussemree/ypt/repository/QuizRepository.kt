@@ -15,4 +15,7 @@ interface QuizRepository : JpaRepository<Quiz, Long> {
     fun findByCategoryId(categoryId: Long, pageable: Pageable): Page<Quiz>
     fun findByIsActiveTrue(): List<Quiz>
     fun findByIsActiveTrue(pageable: Pageable): Page<Quiz>
+    fun findByCategoryIdAndIsActiveTrue(categoryId: Long, pageable: Pageable): Page<Quiz>
+    fun findByTitleContainingIgnoreCaseAndIsActiveTrue(title: String, pageable: Pageable): Page<Quiz>
+    fun findByQuestionsId(questionId: Long): List<Quiz>
 } 
